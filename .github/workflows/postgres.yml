@@ -6,7 +6,6 @@ on:
       - "main"
     paths:
       - ".github/workflows/postgres.yml"
-      - "operator/**"
 
 jobs:
   build-images:
@@ -16,7 +15,7 @@ jobs:
         include:
           - context: .
             file: docker/dockerfile.postgres
-            endpoint: txpipe/ext-mumak
+            endpoint: txpipe/ext-mumak-postgres
 
     continue-on-error: true
     runs-on: ubuntu-latest
