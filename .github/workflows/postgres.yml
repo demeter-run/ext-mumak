@@ -6,6 +6,14 @@ on:
       - "main"
     paths:
       - ".github/workflows/postgres.yml"
+  workflow_dispatch:
+    inputs:
+      mumak_version:
+        description: 'Mumak version to be included in the postgres image. (Defaults to latest)'
+        required: false
+
+env:
+  MUMAK_VERSION: ${{github.event.inputs.mumak_version}}
 
 jobs:
   build-images:
