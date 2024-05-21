@@ -15,7 +15,7 @@ jobs:
         include:
           - context: .
             file: docker/dockerfile.postgres
-            endpoint: txpipe/ext-mumak-postgres
+            endpoint: demeter-run/ext-mumak-postgres
 
     continue-on-error: true
     runs-on: ubuntu-latest
