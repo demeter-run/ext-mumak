@@ -1,13 +1,12 @@
 #!/bin/bash
 
 databases=(${DATABASES[@]:-"postgres"})
+EXTENSION_NAME="mumak${MUMAK_VERSION:+_$MUMAK_VERSION}"
 
 for db in "${databases[@]}"; do
     echo "Checking and creating database if not exists: $db"
 
     psql -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = '$db'" | grep -q 1 || psql -d postgres -c "CREATE DATABASE \"$db\";"
-
-    EXTENSION_NAME="mumak${MUMAK_VERSION:+_$MUMAK_VERSION}"
     
     psql -d "$db" -c "CREATE EXTENSION IF NOT EXISTS \"$EXTENSION_NAME\";"
 
