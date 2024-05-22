@@ -25,7 +25,7 @@ impl Default for Metrics {
         let users_created = IntCounterVec::new(
             opts!(
                 "mumak_operator_users_created_total",
-                "total of users created in dbsync",
+                "total of users created in mumak",
             ),
             &["project", "network"],
         )
@@ -34,7 +34,7 @@ impl Default for Metrics {
         let users_dropped = IntCounterVec::new(
             opts!(
                 "mumak_operator_users_dropped_total",
-                "total of users dropped in dbsync",
+                "total of users dropped in mumak",
             ),
             &["project", "network"],
         )
@@ -143,7 +143,6 @@ pub fn run_metrics_collector(state: Arc<State>) {
         let mut last_execution = Utc::now();
 
         let current = client.default_namespace();
-
         dbg!(current);
 
         loop {

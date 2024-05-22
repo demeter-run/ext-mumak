@@ -18,8 +18,8 @@ pub struct Config {
 
     pub metrics_delay: Duration,
     pub prometheus_url: String,
-    // pub namespace: String,
     pub statement_timeout: u64,
+    pub key_salt: String,
 }
 
 impl Config {
@@ -67,12 +67,13 @@ impl Config {
         );
 
         let prometheus_url = env::var("PROMETHEUS_URL").expect("PROMETHEUS_URL must be set");
-        // let namespace = env::var("NAMESPACE").expect("NAMESPACE must be set");
 
         let statement_timeout = env::var("STATEMENT_TIMEOUT")
             .unwrap_or("120000".to_string())
             .parse::<u64>()
             .expect("STATEMENT_TIMEOUT must be a number");
+
+        let key_salt = env::var("KEY_SALT").unwrap_or("mumak-salt".into());
 
         Self {
             db_urls,
@@ -82,6 +83,7 @@ impl Config {
             metrics_delay,
             prometheus_url,
             statement_timeout,
+            key_salt,
         }
     }
 }
@@ -95,7 +97,7 @@ mod tests {
         env::set_var("DB_URLS", "url1,url2");
         env::set_var(
             "DB_NAMES",
-            "preview=dbsync-preview,preprod=dbsync-preprod,mainnet=dbsync-mainnet",
+            "preview=mumak-preview,preprod=mumak-preprod,mainnet=mumak-mainnet",
         );
         env::set_var("DCU_PER_SECOND", "preview=5,preprod=5,mainnet=5");
         env::set_var("METRICS_DELAY", "100");
@@ -107,9 +109,9 @@ mod tests {
         assert_eq!(
             config.db_names,
             HashMap::from([
-                ("preview".to_owned(), "dbsync-preview".to_owned()),
-                ("preprod".to_owned(), "dbsync-preprod".to_owned()),
-                ("mainnet".to_owned(), "dbsync-mainnet".to_owned())
+                ("preview".to_owned(), "mumak-preview".to_owned()),
+                ("preprod".to_owned(), "mumak-preprod".to_owned()),
+                ("mainnet".to_owned(), "mumak-mainnet".to_owned())
             ])
         );
         assert_eq!(

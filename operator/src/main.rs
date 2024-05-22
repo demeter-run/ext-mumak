@@ -10,7 +10,7 @@ async fn main() -> io::Result<()> {
 
     tracing_subscriber::fmt().with_max_level(Level::INFO).init();
 
-    let state = Arc::new(State::default());
+    let state = Arc::new(State::try_new().await?);
 
     metrics_collector::run_metrics_collector(state.clone());
     metrics_collector::run_metrics_server(state.clone());
