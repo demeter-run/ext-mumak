@@ -142,8 +142,7 @@ pub fn run_metrics_collector(state: Arc<State>) {
         let config = get_config();
         let mut last_execution = Utc::now();
 
-        let current = client.default_namespace();
-        dbg!(current);
+        let current_namespace = client.default_namespace();
 
         loop {
             tokio::time::sleep(config.metrics_delay).await;
@@ -162,7 +161,7 @@ pub fn run_metrics_collector(state: Arc<State>) {
             last_execution = end;
 
             let query = format!(
-                "sum by (user) (avg_over_time(pgbouncer_pools_client_active_connections{{user=~\"dmtr_.*\"}}[{interval}s] @ {})) > 0",
+                "sum by (user) (avg_over_time(pgbouncer_pools_client_active_connections{{user=~\"dmtr_.*\", namespace=\"{current_namespace}\"}}[{interval}s] @ {})) > 0",
                 end.timestamp_millis() / 1000
             );
 
