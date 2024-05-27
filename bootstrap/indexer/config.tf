@@ -18,7 +18,7 @@ resource "kubernetes_config_map" "config" {
       "cursor" : {
         "type" : "Redis",
         "key" : "mumak:cursor:network:${var.network}",
-        "url": var.redis_url
+        "url" : var.redis_url
       }
       "policy" : {
         "missing_data" : "Skip"

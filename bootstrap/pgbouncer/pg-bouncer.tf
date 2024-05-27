@@ -37,7 +37,7 @@ resource "kubernetes_deployment_v1" "pgbouncer" {
       spec {
         container {
           name  = "main"
-          image = "bitnami/pgbouncer:${var.pg_bouncer_image_tag}"
+          image = "bitnami/pgbouncer:${var.image_tag}"
 
           resources {
             limits = {
@@ -107,41 +107,6 @@ resource "kubernetes_deployment_v1" "pgbouncer" {
 
         }
 
-        # container {
-        #   name  = "readiness"
-        #   image = "ghcr.io/demeter-run/cardano-dbsync-probe:${var.dbsync_probe_image_tag}"
-        #   env {
-        #     name  = "PGHOST"
-        #     value = var.postgres_instance_name
-        #   }
-        #
-        #   env {
-        #     name  = "PGPORT"
-        #     value = "5432"
-        #   }
-        #
-        #   env {
-        #     name  = "PGUSER"
-        #     value = "postgres"
-        #   }
-        #
-        #   env {
-        #     name = "PGPASSWORD"
-        #     value_from {
-        #       secret_key_ref {
-        #         name = var.postgres_secret_name
-        #         key  = "password"
-        #       }
-        #     }
-        #   }
-        #   readiness_probe {
-        #     exec {
-        #       command = ["./probe.sh"]
-        #     }
-        #     period_seconds = "90"
-        #   }
-        # }
-
         container {
           name  = "exporter"
           image = "prometheuscommunity/pgbouncer-exporter:v0.7.0"
@@ -151,7 +116,7 @@ resource "kubernetes_deployment_v1" "pgbouncer" {
             protocol       = "TCP"
           }
           args = [
-            "--pgBouncer.connectionString=postgres://pgbouncer:${var.pg_bouncer_auth_user_password}@localhost:6432/pgbouncer?sslmode=disable",
+            "--pgBouncer.connectionString=postgres://pgbouncer:${var.auth_user_password}@localhost:6432/pgbouncer?sslmode=disable",
           ]
 
         }
@@ -209,7 +174,7 @@ resource "kubernetes_config_map" "mumak_pgbouncer_users" {
   }
 
   data = {
-    "users.txt" = "${templatefile("${path.module}/users.txt.tftpl", { auth_user_password = "${var.pg_bouncer_auth_user_password}", users = var.pg_bouncer_user_settings })}"
+    "users.txt" = "${templatefile("${path.module}/users.txt.tftpl", { auth_user_password = "${var.auth_user_password}", users = var.user_settings })}"
   }
 }
 
@@ -221,6 +186,6 @@ resource "kubernetes_config_map" "mumak_pgbouncer_ini_config" {
   }
 
   data = {
-    "pgbouncer.ini" = "${templatefile("${path.module}/pgbouncer.ini.tftpl", { db_host = "${var.postgres_instance_name}", users = var.pg_bouncer_user_settings })}"
+    "pgbouncer.ini" = "${templatefile("${path.module}/pgbouncer.ini.tftpl", { db_host = "${var.postgres_instance_name}", users = var.user_settings })}"
   }
 }

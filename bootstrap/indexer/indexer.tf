@@ -1,12 +1,8 @@
-locals {
-  name = "mumak-indexer-${var.network}"
-}
-
 resource "kubernetes_deployment_v1" "indexer" {
   wait_for_rollout = false
 
   metadata {
-    name      = local.name
+    name      = var.instance_name
     namespace = var.namespace
     labels = {
       "role"                        = "indexer"
@@ -21,7 +17,7 @@ resource "kubernetes_deployment_v1" "indexer" {
     selector {
       match_labels = {
         "role"                        = "indexer"
-        "demeter.run/instance"        = local.name
+        "demeter.run/instance"        = var.instance_name
         "cardano.demeter.run/network" = var.network
       }
     }
@@ -29,10 +25,10 @@ resource "kubernetes_deployment_v1" "indexer" {
     template {
 
       metadata {
-        name = local.name
+        name = var.instance_name
         labels = {
           "role"                        = "indexer"
-          "demeter.run/instance"        = local.name
+          "demeter.run/instance"        = var.instance_name
           "cardano.demeter.run/network" = var.network
         }
       }

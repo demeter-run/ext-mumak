@@ -1,8 +1,12 @@
 locals {
-  configmap_name = "oura_config_${var.network}"
+  configmap_name = "oura-config-${var.instance_name}"
 }
 
 variable "namespace" {
+  type = string
+}
+
+variable "instance_name" {
   type = string
 }
 
@@ -17,7 +21,7 @@ variable "network" {
 
 variable "image_tag" {
   type    = string
-  default = latest
+  default = "latest"
 }
 
 variable "testnet_magic" {
