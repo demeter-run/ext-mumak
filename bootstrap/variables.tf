@@ -37,7 +37,8 @@ variable "dcu_per_second" {
 }
 
 variable "postgres_secret_name" {
-  type = string
+  type    = string
+  default = "postgres-secret"
 }
 
 variable "postgres_password" {
