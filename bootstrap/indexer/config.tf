@@ -12,13 +12,26 @@ resource "kubernetes_config_map" "config" {
         "min_depth" : 2
       },
       "intersect" : var.intersect_config
+      "filters" : [
+        {
+          type : "EmitCbor"
+        }
+      ]
+      "sink" : {
+        "type" : "SqlDb"
+        "apply_cbor_block_template" : "INSERT INTO blocks (slot, cbor) VALUES ('{{point.slot}}', decode('{{record.hex}}', 'hex'));"
+        "undo_cbor_block_template" : "DELETE FROM blocks WHERE slot = {{point.slot}}"
+        "apply_cbor_tx_template" : "INSERT INTO txs (slot, cbor) VALUES ('{{point.slot}}', decode('{{record.hex}}', 'hex'));"
+        "undo_cbor_tx_template" : "DELETE FROM txs WHERE slot = {{point.slot}}"
+        "reset_cbor_block_template" : "DELETE FROM blocks WHERE slot > {{point.slot}};"
+        "reset_cbor_tx_template" : "DELETE FROM txs WHERE slot > {{point.slot}};"
+      }
       "chain" : {
         "type" : var.network
       },
       "cursor" : {
-        "type" : "Redis",
-        "key" : "mumak:cursor:network:${var.network}",
-        "url" : var.redis_url
+        "type" : "File",
+        "path" : "cursor"
       }
       "policy" : {
         "missing_data" : "Skip"

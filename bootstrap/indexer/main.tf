@@ -38,7 +38,11 @@ variable "intersect_config" {
   }
 }
 
-variable "redis_url" {
+variable "postgres_host" {
+  type = string
+}
+
+variable "postgres_secret_name" {
   type = string
 }
 

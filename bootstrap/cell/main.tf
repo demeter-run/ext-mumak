@@ -1,7 +1,9 @@
 // Each cell of the mumak extension containes 1 PVC, 1 Postgres instance, 1
 // PGBouncer that acts proxy and an amount of indexers (commonly 3, one per
 // network).
-
+locals {
+  postgres_host = "postgres-${var.salt}"
+}
 module "mumak_pvc" {
   source       = "../pvc"
   namespace    = var.namespace
@@ -15,7 +17,7 @@ module "mumak_postgres" {
 
   namespace            = var.namespace
   db_volume_claim      = "pvc-${var.salt}"
-  instance_name        = "postgres-${var.salt}"
+  instance_name        = local.postgres_host
   postgres_config_name = "postgres-config-${var.salt}"
   topology_zone        = var.topology_zone
   postgres_image_tag   = var.postgres_image_tag
@@ -34,23 +36,21 @@ module "mumak_pgbouncer" {
   instance_role          = "pgbouncer"
   postgres_secret_name   = var.postgres_secret_name
   instance_name          = "pgbouncer-${var.salt}"
-  postgres_instance_name = "postgres-${var.salt}"
+  postgres_instance_name = local.postgres_host
 }
 
 module "mumak_indexers" {
   source   = "../indexer"
   for_each = var.indexers
 
-  namespace        = var.namespace
-  instance_name    = "indexer-${each.key}-${var.salt}"
-  image_tag        = coalesce(each.value.image_tag, "latest")
-  network          = each.value.network
-  testnet_magic    = each.value.testnet_magic
-  node_private_dns = each.value.node_private_dns
-  redis_url        = each.value.redis_url
-  intersect_config = coalesce(each.value.intersect_config, {
-    "type" = "Origin"
-  })
+  namespace            = var.namespace
+  instance_name        = "indexer-${each.key}-${var.salt}"
+  image_tag            = coalesce(each.value.image_tag, "latest")
+  network              = each.value.network
+  testnet_magic        = each.value.testnet_magic
+  node_private_dns     = each.value.node_private_dns
+  postgres_host        = local.postgres_host
+  postgres_secret_name = var.postgres_secret_name
   resources = coalesce(each.value.resources, {
     limits : {
       cpu : "200m",

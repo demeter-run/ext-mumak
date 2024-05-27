@@ -1,4 +1,4 @@
-resource "kubernetes_deployment_v1" "indexer" {
+resource "kubernetes_stateful_set_v1" "indexer" {
   wait_for_rollout = false
 
   metadata {
@@ -12,7 +12,8 @@ resource "kubernetes_deployment_v1" "indexer" {
   }
 
   spec {
-    replicas = 1
+    replicas     = 1
+    service_name = "mumak-indexer"
 
     selector {
       match_labels = {
@@ -62,13 +63,28 @@ resource "kubernetes_deployment_v1" "indexer" {
             value = "debug"
           }
 
+          env {
+            name = "POSTGRES_PASSWORD"
+            value_from {
+              secret_key_ref {
+                name = var.postgres_secret_name
+                key  = "password"
+              }
+            }
+          }
+
+          env {
+            name  = "OURA_SINK_CONNECTION"
+            value = "postgres://postgres:$(POSTGRES_PASSWORD)@${var.postgres_host}:5432/mumak-${var.network}"
+          }
+
           volume_mount {
             name       = "ipc"
             mount_path = "/ipc"
           }
 
           volume_mount {
-            name       = "oura_config_${var.network}"
+            name       = local.configmap_name
             mount_path = "/etc/oura"
           }
         }

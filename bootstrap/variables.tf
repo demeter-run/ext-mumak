@@ -128,8 +128,6 @@ variable "cells" {
       network          = string
       testnet_magic    = string
       node_private_dns = string
-      redis_url        = string
-      intersect_config = optional(any)
       resources = optional(object({
         limits = object({
           cpu    = string
