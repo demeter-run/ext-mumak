@@ -42,7 +42,7 @@ resource "kubernetes_stateful_set_v1" "postgres" {
 
         container {
           name              = "main"
-          image             = "postgres:${var.postgres_image_tag}"
+          image             = "ghcr.io/demeter-run/ext-mumak-postgres:${var.image_tag}"
           args              = ["-c", "config_file=/etc/postgresql/postgresql.conf"]
           image_pull_policy = "Always"
 

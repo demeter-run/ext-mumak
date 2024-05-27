@@ -20,7 +20,7 @@ module "mumak_postgres" {
   instance_name        = local.postgres_host
   postgres_config_name = "postgres-config-${var.salt}"
   topology_zone        = var.topology_zone
-  postgres_image_tag   = var.postgres_image_tag
+  image_tag            = var.postgres_image_tag
   postgres_secret_name = var.postgres_secret_name
   postgres_resources   = var.postgres_resources
 }

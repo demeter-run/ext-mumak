@@ -14,7 +14,7 @@ variable "topology_zone" {
   type = string
 }
 
-variable "postgres_image_tag" {
+variable "image_tag" {
   type = string
 }
 
