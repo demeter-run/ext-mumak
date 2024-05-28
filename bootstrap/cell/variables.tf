@@ -83,6 +83,7 @@ variable "pgbouncer_auth_user_password" {
 variable "indexers" {
   type = map(object({
     image_tag        = optional(string)
+    image            = optional(string)
     network          = string
     db               = string
     testnet_magic    = string

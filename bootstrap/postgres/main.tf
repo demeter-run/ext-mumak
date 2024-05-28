@@ -11,7 +11,7 @@ variable "instance_name" {
 }
 
 variable "databases" {
-  type = string
+  type        = string
   description = "Space separated list."
 }
 

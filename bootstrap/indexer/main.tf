@@ -23,6 +23,11 @@ variable "db" {
   type = string
 }
 
+variable "image" {
+  type    = string
+  default = "ghcr.io/txpipe/oura"
+}
+
 variable "image_tag" {
   type    = string
   default = "latest"

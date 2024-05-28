@@ -32,7 +32,7 @@ resource "kubernetes_deployment_v1" "operator" {
 
       spec {
         container {
-          image = "ghcr.io/demeter-run/ext-mumak:${var.operator_image_tag}"
+          image = "ghcr.io/demeter-run/ext-mumak-operator:${var.operator_image_tag}"
           name  = "main"
 
           env {
@@ -72,7 +72,7 @@ resource "kubernetes_deployment_v1" "operator" {
 
           env {
             name  = "DB_NAMES"
-            value = "mainnet=mumak-mainnet,preprod=mumak-preprod,preview=mumak-preview,vector-testnet=mumak-vector-testnet"
+            value = "mainnet=cardano-mainnet,preprod=cardano-preprod,preview=cardano-preview"
           }
 
           env {

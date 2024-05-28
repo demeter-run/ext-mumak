@@ -126,6 +126,7 @@ variable "cells" {
       replicas = number
     })
     indexers = map(object({
+      image            = optional(string)
       image_tag        = optional(string)
       network          = string
       testnet_magic    = string

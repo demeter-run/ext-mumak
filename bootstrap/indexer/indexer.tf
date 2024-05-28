@@ -64,7 +64,7 @@ resource "kubernetes_stateful_set_v1" "indexer" {
 
         container {
           name              = "indexer"
-          image             = "ghcr.io/txpipe/oura:${var.image_tag}"
+          image             = "${var.image}:${var.image_tag}"
           args              = ["daemon", "--config", "/etc/oura/daemon.toml"]
           image_pull_policy = "IfNotPresent"
 
@@ -105,7 +105,7 @@ resource "kubernetes_stateful_set_v1" "indexer" {
           }
 
           volume_mount {
-            name       = local.configmap_name
+            name       = "configs"
             mount_path = "/etc/oura"
           }
 
@@ -137,6 +137,13 @@ resource "kubernetes_stateful_set_v1" "indexer" {
         volume {
           name = "ipc"
           empty_dir {}
+        }
+
+        volume {
+          name = "configs"
+          config_map {
+            name = local.configmap_name
+          }
         }
 
         toleration {

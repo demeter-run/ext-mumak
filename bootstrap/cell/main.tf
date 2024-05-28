@@ -47,6 +47,7 @@ module "mumak_indexers" {
   namespace            = var.namespace
   instance_name        = "indexer-${each.key}-${var.salt}"
   image_tag            = coalesce(each.value.image_tag, "latest")
+  image                = coalesce(each.value.image, "ghcr.io/txpipe/oura")
   network              = each.value.network
   db                   = each.value.db
   testnet_magic        = each.value.testnet_magic

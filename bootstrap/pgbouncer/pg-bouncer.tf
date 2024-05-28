@@ -69,7 +69,7 @@ resource "kubernetes_deployment_v1" "pgbouncer" {
             name = "POSTGRESQL_PASSWORD"
             value_from {
               secret_key_ref {
-                name = "postgres.postgres-mumak-m1"
+                name = var.postgres_secret_name
                 key  = "password"
               }
             }

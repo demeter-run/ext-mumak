@@ -141,7 +141,7 @@ resource "kubernetes_stateful_set_v1" "postgres" {
         volume {
           name = "config"
           config_map {
-            name = "postgres-config"
+            name = var.postgres_config_name
           }
         }
 
