@@ -1,0 +1,33 @@
+[source]
+type = "N2C"
+socket_path = "/ipc/node.socket"
+
+[intersect]
+type = "Origin"
+
+[chain]
+type = "${network}"
+
+[[filters]]
+type = "EmitCbor"
+
+[sink]
+type = "SqlDb"
+apply_cbor_block_template = "INSERT INTO blocks (slot, cbor) VALUES ('{{point.slot}}', decode('{{record.hex}}', 'hex'));"
+undo_cbor_block_template = "DELETE FROM blocks WHERE slot = {{point.slot}}"
+apply_cbor_tx_template = "INSERT INTO txs (slot, cbor) VALUES ('{{point.slot}}', decode('{{record.hex}}', 'hex'));"
+undo_cbor_tx_template = "DELETE FROM txs WHERE slot = {{point.slot}}"
+reset_cbor_block_template = "DELETE FROM blocks WHERE slot > {{#if point.slot}}{{point.slot}}{{else}}-1{{/if}};"
+reset_cbor_tx_template = "DELETE FROM txs WHERE slot > {{#if point.slot}}{{point.slot}}{{else}}-1{{/if}};"
+
+[cursor]
+type = "File"
+path = "/data/cursor"
+
+[policy]
+missing_data = "Skip"
+cbor_errors = "Warn"
+
+[metrics]
+address = "0.0.0.0:9186"
+endpoint = "/metrics"
