@@ -6,6 +6,7 @@ on:
       - "main"
     paths:
       - ".github/workflows/postgres.yml"
+      - "docker/dockerfile.postgres"
   workflow_dispatch:
     inputs:
       mumak_version:
