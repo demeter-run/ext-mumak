@@ -99,6 +99,11 @@ resource "kubernetes_stateful_set_v1" "indexer" {
             value = "postgres://postgres:$(POSTGRES_PASSWORD)@${var.postgres_host}:5432/${var.db}"
           }
 
+          port {
+            container_port = 9186
+            name           = "metrics"
+          }
+
           volume_mount {
             name       = "ipc"
             mount_path = "/ipc"
