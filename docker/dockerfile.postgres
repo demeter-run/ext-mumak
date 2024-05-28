@@ -27,17 +27,12 @@ RUN cargo install --locked cargo-pgrx && cargo pgrx init --pg16 /usr/lib/postgre
 WORKDIR /source
 RUN git clone https://github.com/txpipe/mumak.git
 
-WORKDIR /source/mumak/extension
+RUN sudo chown -R postgres:postgres /source
+RUN cd /source/mumak/extension && cargo pgrx install -r --pg-config /usr/lib/postgresql/16/bin/pg_config
 
-RUN cargo pgrx package --pg-config /usr/lib/postgresql/16/bin/pg_config
-
-RUN SQL_FILE=$(ls /source/mumak/extension/target/release/mumak-pg16/usr/share/postgresql/16/extension/mumak--*.sql) && \
-    cp $SQL_FILE /source/mumak/extension/target/release/mumak-pg16/usr/share/postgresql/16/extension/mumak.sql
-
+# Extract only compiled extensions
 FROM postgres:16
-
-COPY --from=build /source/mumak/extension/target/release/mumak-pg16/usr/share/postgresql/16/extension/mumak.control /usr/share/postgresql/16/extension/mumak.control
-COPY --from=build /source/mumak/extension/target/release/mumak-pg16/usr/lib/postgresql/16/lib/mumak.so /usr/lib/postgresql/16/lib/mumak.so
-COPY --from=build /source/mumak/extension/target/release/mumak-pg16/usr/share/postgresql/16/extension/mumak.sql /usr/share/postgresql/16/extension/mumak.sql
+COPY --from=build /usr/share/postgresql /usr/share/postgresql
+COPY --from=build /usr/lib/postgresql /usr/lib/postgresql
 
 COPY ./docker/init-db.sh /docker-entrypoint-initdb.d/
