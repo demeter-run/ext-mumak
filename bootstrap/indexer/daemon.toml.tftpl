@@ -17,8 +17,8 @@ apply_cbor_block_template = "INSERT INTO blocks (slot, cbor) VALUES ('{{point.sl
 undo_cbor_block_template = "DELETE FROM blocks WHERE slot = {{point.slot}}"
 apply_cbor_tx_template = "INSERT INTO txs (slot, cbor) VALUES ('{{point.slot}}', decode('{{record.hex}}', 'hex'));"
 undo_cbor_tx_template = "DELETE FROM txs WHERE slot = {{point.slot}}"
-reset_cbor_block_template = "DELETE FROM blocks WHERE slot > {{point.slot}};"
-reset_cbor_tx_template = "DELETE FROM txs WHERE slot > {{point.slot}};"
+reset_cbor_block_template = "DELETE FROM blocks WHERE slot > {{#if point.slot}}{{point.slot}}{{else}}-1{{/if}};"
+reset_cbor_tx_template = "DELETE FROM txs WHERE slot > {{#if point.slot}}{{point.slot}}{{else}}-1{{/if}};"
 
 [cursor]
 type = "File"
