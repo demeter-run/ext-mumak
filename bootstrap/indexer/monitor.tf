@@ -7,7 +7,7 @@ resource "kubernetes_manifest" "indexer_podmonitor" {
         "app.kubernetes.io/component" = "o11y"
         "app.kubernetes.io/part-of"   = "demeter"
       }
-      "name"      = "${var.instance_name}-indexer"
+      "name"      = var.instance_name
       "namespace" = var.namespace
     }
     "spec" = {
@@ -19,7 +19,7 @@ resource "kubernetes_manifest" "indexer_podmonitor" {
       ]
       "selector" = {
         "matchLabels" = {
-          "demeter.run/instance" = "${var.instance_name}-indexer"
+          "demeter.run/instance" = var.instance_name
         }
       }
     }
