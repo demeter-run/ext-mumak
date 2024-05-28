@@ -31,7 +31,7 @@ resource "kubernetes_config_map" "config" {
       },
       "cursor" : {
         "type" : "File",
-        "path" : "cursor"
+        "path" : "/data/cursor"
       }
       "policy" : {
         "missing_data" : "Skip"

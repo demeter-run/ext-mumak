@@ -63,6 +63,11 @@ resource "kubernetes_stateful_set_v1" "postgres" {
           }
 
           env {
+            name  = "DATABASES"
+            value = var.databases
+          }
+
+          env {
             name  = "PGDATA"
             value = "/var/lib/postgresql/data/${var.namespace}/${var.instance_name}/pgdata"
           }
@@ -159,7 +164,7 @@ resource "kubernetes_stateful_set_v1" "postgres" {
           effect   = "NoSchedule"
           key      = "demeter.run/compute-arch"
           operator = "Equal"
-          value    = "x86"
+          value    = "arm64"
         }
 
         toleration {

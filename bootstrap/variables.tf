@@ -109,6 +109,7 @@ variable "cells" {
     postgres = object({
       image_tag     = string
       topology_zone = string
+      databases     = string
       resources = object({
         limits = object({
           cpu    = string
@@ -129,6 +130,7 @@ variable "cells" {
       network          = string
       testnet_magic    = string
       node_private_dns = string
+      db               = string
       resources = optional(object({
         limits = object({
           cpu    = string

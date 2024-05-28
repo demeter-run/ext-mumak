@@ -8,6 +8,7 @@ for db in "${databases[@]}"; do
 
     psql -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = '$db'" | grep -q 1 || psql -d postgres -c "CREATE DATABASE \"$db\";"
     
+    psql -d "$db" -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements;"
     psql -d "$db" -c "CREATE EXTENSION IF NOT EXISTS \"$EXTENSION_NAME\";"
 
     psql -d "$db" -c "

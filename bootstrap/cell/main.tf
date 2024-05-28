@@ -18,6 +18,7 @@ module "mumak_postgres" {
   namespace            = var.namespace
   db_volume_claim      = "pvc-${var.salt}"
   instance_name        = local.postgres_host
+  databases            = var.databases
   postgres_config_name = "postgres-config-${var.salt}"
   topology_zone        = var.topology_zone
   image_tag            = var.postgres_image_tag
@@ -47,6 +48,7 @@ module "mumak_indexers" {
   instance_name        = "indexer-${each.key}-${var.salt}"
   image_tag            = coalesce(each.value.image_tag, "latest")
   network              = each.value.network
+  db                   = each.value.db
   testnet_magic        = each.value.testnet_magic
   node_private_dns     = each.value.node_private_dns
   postgres_host        = local.postgres_host

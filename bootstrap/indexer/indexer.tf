@@ -11,6 +11,7 @@ resource "kubernetes_stateful_set_v1" "indexer" {
     }
   }
 
+
   spec {
     replicas     = 1
     service_name = "mumak-indexer"
@@ -20,6 +21,26 @@ resource "kubernetes_stateful_set_v1" "indexer" {
         "role"                        = "indexer"
         "demeter.run/instance"        = var.instance_name
         "cardano.demeter.run/network" = var.network
+      }
+    }
+
+    volume_claim_template {
+      metadata {
+        name      = "data"
+        namespace = var.namespace
+        labels = {
+          "demeter.run/instance" = var.instance_name
+        }
+      }
+      spec {
+        access_modes = ["ReadWriteOnce"]
+
+        resources {
+          requests = {
+            storage = "1Gi"
+          }
+        }
+        storage_class_name = "gp3"
       }
     }
 
@@ -75,7 +96,7 @@ resource "kubernetes_stateful_set_v1" "indexer" {
 
           env {
             name  = "OURA_SINK_CONNECTION"
-            value = "postgres://postgres:$(POSTGRES_PASSWORD)@${var.postgres_host}:5432/mumak-${var.network}"
+            value = "postgres://postgres:$(POSTGRES_PASSWORD)@${var.postgres_host}:5432/${var.db}"
           }
 
           volume_mount {
@@ -86,6 +107,11 @@ resource "kubernetes_stateful_set_v1" "indexer" {
           volume_mount {
             name       = local.configmap_name
             mount_path = "/etc/oura"
+          }
+
+          volume_mount {
+            name       = "data"
+            mount_path = "/data"
           }
         }
 

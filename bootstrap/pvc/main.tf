@@ -23,7 +23,7 @@ resource "kubernetes_persistent_volume_claim" "shared_disk" {
   }
 
   spec {
-    access_modes = ["ReadWriteMany"]
+    access_modes = ["ReadWriteOnly"]
     resources {
       requests = {
         storage = var.storage_size

@@ -51,6 +51,7 @@ module "mumak_cells" {
   postgres_image_tag   = each.value.postgres.image_tag
   postgres_secret_name = var.postgres_secret_name
   postgres_resources   = each.value.postgres.resources
+  databases            = each.value.postgres.databases
 
   // PGBouncer
   pgbouncer_image_tag          = var.pgbouncer_image_tag
