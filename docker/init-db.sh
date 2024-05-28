@@ -1,25 +1,30 @@
 #!/bin/bash
 
+databases=(${DATABASES[@]:-"postgres"})
 EXTENSION_NAME="mumak${MUMAK_VERSION:+_$MUMAK_VERSION}"
-# Create the extension
-psql -d postgres -c "CREATE EXTENSION IF NOT EXISTS \"$EXTENSION_NAME\";"
 
-# Create the blocks table
-psql -d postgres -c "
-CREATE TABLE IF NOT EXISTS blocks (
-    slot INTEGER NOT NULL,
-    cbor BYTEA
-);"
+for db in "${databases[@]}"; do
+    echo "Checking and creating database if not exists: $db"
 
-# Create the index for the blocks table
-psql -d postgres -c "CREATE INDEX IF NOT EXISTS idx_blocks_slot ON blocks(slot);"
+    psql -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = '$db'" | grep -q 1 || psql -d postgres -c "CREATE DATABASE \"$db\";"
+    
+    psql -d "$db" -c "CREATE EXTENSION IF NOT EXISTS \"$EXTENSION_NAME\";"
 
-# Create the txs table
-psql -d postgres -c "
-CREATE TABLE IF NOT EXISTS txs (
-    slot INTEGER NOT NULL,
-    cbor BYTEA
-);"
+    psql -d "$db" -c "
+    CREATE TABLE IF NOT EXISTS blocks (
+        slot INTEGER NOT NULL,
+        cbor BYTEA
+    );"
 
-# Create the index for the txs table
-psql -d postgres -c "CREATE INDEX IF NOT EXISTS idx_txs_slot ON txs(slot);"
+    psql -d "$db" -c "CREATE INDEX IF NOT EXISTS idx_blocks_slot ON blocks(slot);"
+
+    psql -d "$db" -c "
+    CREATE TABLE IF NOT EXISTS txs (
+        slot INTEGER NOT NULL,
+        cbor BYTEA
+    );"
+
+    psql -d "$db" -c "CREATE INDEX IF NOT EXISTS idx_txs_slot ON txs(slot);"
+
+    echo "Initialization completed for database: $db"
+done
