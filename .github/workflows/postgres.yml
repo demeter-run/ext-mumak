@@ -49,7 +49,7 @@ jobs:
           context: .
           file: docker/dockerfile.postgres
           push: true
-          tags: ghcr.io/demeter-run/ext-mumak-postgres:${{ github.sha }}-${{suffix}}
+          tags: ghcr.io/demeter-run/ext-mumak-postgres:${{ github.sha }}-${{ matrix.suffix }}
 
   build-manifest:
     needs:
