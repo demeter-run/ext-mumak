@@ -74,8 +74,13 @@ jobs:
         with:
           index-annotations: ${{ steps.metadata.outputs.labels }}
           tags: |
+<<<<<<< Updated upstream
             ${{github.sha}}
             latest
+=======
+            ghcr.io/demeter-run/ext-mumak-postgres:${{gihub.sha}}
+            ghcr.io/demeter-run/ext-mumak-postgres
+>>>>>>> Stashed changes
           sources: |
             ghcr.io/demeter-run/ext-mumak-postgres:${{ github.sha }}-amd
             ghcr.io/demeter-run/ext-mumak-postgres:${{ github.sha }}-arm
