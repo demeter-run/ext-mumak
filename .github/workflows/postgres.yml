@@ -74,7 +74,7 @@ jobs:
         with:
           index-annotations: ${{ steps.metadata.outputs.labels }}
           tags: |
-            ghcr.io/demeter-run/ext-mumak-postgres:${{gihub.sha}}
+            ghcr.io/demeter-run/ext-mumak-postgres:${{ github.sha }}
             ghcr.io/demeter-run/ext-mumak-postgres
           sources: |
             ghcr.io/demeter-run/ext-mumak-postgres:${{ github.sha }}-amd
