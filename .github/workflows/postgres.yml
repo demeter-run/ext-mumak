@@ -51,7 +51,7 @@ jobs:
           push: true
           tags: ghcr.io/${{ matrix.endpoint }}:${{ github.sha }}
 
-  build:
+  build-manifest:
     needs:
       - build-images
     runs-on: ubuntu-latest
