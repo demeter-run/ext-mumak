@@ -25,11 +25,11 @@ jobs:
         include:
           - release_for: Linux-x86_64
             build_on: ubuntu-latest
-            endpoint: demeter-run/ext-mumak-postgres-amd
+            suffix: amd
 
           - release_for: Linux-arm64
             build_on: buildjet-2vcpu-ubuntu-2204-arm
-            endpoint: demeter-run/ext-mumak-postgres-arm
+            suffix: arm
 
     runs-on: ${{ matrix.build_on }}
 
@@ -49,7 +49,7 @@ jobs:
           context: .
           file: docker/dockerfile.postgres
           push: true
-          tags: ghcr.io/${{ matrix.endpoint }}:${{ github.sha }}
+          tags: ghcr.io/demeter-run/ext-mumak-postgres:${{ github.sha }}-${{suffix}}
 
   build-manifest:
     needs:
@@ -75,5 +75,5 @@ jobs:
           index-annotations: ${{ steps.metadata.outputs.labels }}
           tags: ${{ steps.metadata.outputs.tags }}
           sources: |
-            ghcr.io/demeter-run/ext-mumak-postgres-amd:${{ github.sha }}
-            ghcr.io/demeter-run/ext-mumak-postgres-arm:${{ github.sha }}
+            ghcr.io/demeter-run/ext-mumak-postgres:${{ github.sha }}-amd
+            ghcr.io/demeter-run/ext-mumak-postgres:${{ github.sha }}-arm
