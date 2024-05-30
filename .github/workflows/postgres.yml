@@ -6,8 +6,8 @@ on:
     branches:
       - "main"
     paths:
-      - ".github/workflows/instance.yml"
-      - "docker/dockerfile.instance"
+      - ".github/workflows/postgres.yml"
+      - "docker/dockerfile.postgres"
       - "docker/init-db.sh"
 
 jobs:
