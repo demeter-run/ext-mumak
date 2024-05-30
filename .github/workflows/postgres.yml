@@ -1,40 +1,35 @@
 name: Postgres
 
 on:
+  workflow_dispatch: {}
   push:
     branches:
       - "main"
     paths:
-      - ".github/workflows/postgres.yml"
-      - "docker/dockerfile.postgres"
-  workflow_dispatch:
-    inputs:
-      mumak_version:
-        description: 'Mumak version to be included in the postgres image. (Defaults to latest)'
-        required: false
-
-env:
-  MUMAK_VERSION: ${{github.event.inputs.mumak_version}}
+      - ".github/workflows/instance.yml"
+      - "docker/dockerfile.instance"
+      - "docker/init-db.sh"
 
 jobs:
   build-images:
-    continue-on-error: true
-
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - release_for: Linux-x86_64
-            build_on: ubuntu-latest
-            suffix: amd
+          - context: .
+            file: docker/dockerfile.postgres
+            endpoint: demeter-run/ext-mumak-postgres
 
-          - release_for: Linux-arm64
-            build_on: buildjet-2vcpu-ubuntu-2204-arm
-            suffix: arm
-
-    runs-on: ${{ matrix.build_on }}
-
+    continue-on-error: true
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
@@ -46,36 +41,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: .
-          file: docker/dockerfile.postgres
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/demeter-run/ext-mumak-postgres:${{ github.sha }}-${{ matrix.suffix }}
-
-  build-manifest:
-    needs:
-      - build-images
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: docker/metadata-action@v5
-        id: metadata
-        with:
-          images: ghcr.io/demeter-run/ext-mumak-postgres
-
-      - uses: int128/docker-manifest-create-action@v2
-        id: build
-        with:
-          index-annotations: ${{ steps.metadata.outputs.labels }}
-          tags: |
-            ghcr.io/demeter-run/ext-mumak-postgres:${{ github.sha }}
-            ghcr.io/demeter-run/ext-mumak-postgres
-          sources: |
-            ghcr.io/demeter-run/ext-mumak-postgres:${{ github.sha }}-amd
-            ghcr.io/demeter-run/ext-mumak-postgres:${{ github.sha }}-arm
+          tags: ghcr.io/${{ matrix.endpoint }},ghcr.io/${{ matrix.endpoint }}:${{ github.sha }}

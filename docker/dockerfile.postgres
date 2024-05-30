@@ -1,38 +1,4 @@
-FROM postgres:16 as build
-
-RUN apt update && apt -y install \
-    curl \
-    git \
-    libclang-dev \
-    build-essential \
-    libreadline-dev \
-    zlib1g-dev \
-    flex \
-    bison \
-    libxml2-dev \
-    libxslt-dev \
-    libssl-dev \
-    libxml2-utils \
-    xsltproc \
-    ccache \
-    pkg-config \
-    sudo \
-    postgresql-server-dev-16
-
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-RUN cargo install --locked cargo-pgrx && cargo pgrx init --pg16 /usr/lib/postgresql/16/bin/pg_config
-
-WORKDIR /source
-RUN git clone https://github.com/txpipe/mumak.git
-
-RUN sudo chown -R postgres:postgres /source
-RUN cd /source/mumak/extension && cargo pgrx install -r --pg-config /usr/lib/postgresql/16/bin/pg_config
-
-# Extract only compiled extensions
-FROM postgres:16
-COPY --from=build /usr/share/postgresql /usr/share/postgresql
-COPY --from=build /usr/lib/postgresql /usr/lib/postgresql
+ARG MUMAK_VERSION=latest
+FROM ghcr.io/txpipe/mumak:$MUMAK_VERSION
 
 COPY ./docker/init-db.sh /docker-entrypoint-initdb.d/
