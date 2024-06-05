@@ -28,7 +28,7 @@ jobs:
             suffix: amd
 
           - release_for: Linux-arm64
-            build_on: buildjet-2vcpu-ubuntu-2204-arm
+            build_on: ubuntu-arm
             suffix: arm
 
     runs-on: ${{ matrix.build_on }}
