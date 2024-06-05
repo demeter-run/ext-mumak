@@ -73,7 +73,7 @@ pub fn build_password(crd: &MumakPort) -> Result<String, Error> {
         return Err(Error::ArgonError("Error to hash a password".into()));
     }
 
-    let password = BASE64_STANDARD.encode(output);
+    let password = BASE64_STANDARD_NO_PAD.encode(output);
 
     Ok(password)
 }
