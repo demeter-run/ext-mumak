@@ -230,7 +230,7 @@ pub fn run_metrics_collector(state: Arc<State>) {
                         .throughput_tier
                         .clone()
                         .unwrap_or("0".to_string()),
-                    result.value,
+                    total_exec_time,
                 );
             }
         }
