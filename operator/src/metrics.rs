@@ -2,7 +2,7 @@ use chrono::Utc;
 use http_body_util::{combinators::BoxBody, BodyExt, Full};
 use hyper::{body::Bytes, server::conn::http1, service::service_fn, Response};
 use hyper_util::rt::TokioIo;
-use kube::{api::ListParams, Api, Client, Resource, ResourceExt};
+use kube::{api::ListParams, core::object::HasSpec, Api, Client, Resource, ResourceExt};
 use prometheus::{opts, Encoder, IntCounterVec, Registry, TextEncoder};
 use serde::{Deserialize, Deserializer};
 use std::{net::SocketAddr, str::FromStr, sync::Arc};
@@ -18,6 +18,7 @@ pub struct Metrics {
     pub reconcile_failures: IntCounterVec,
     pub metrics_failures: IntCounterVec,
     pub dcu: IntCounterVec,
+    pub usage: IntCounterVec,
 }
 
 impl Default for Metrics {
@@ -64,12 +65,19 @@ impl Default for Metrics {
         )
         .unwrap();
 
+        let usage = IntCounterVec::new(
+            opts!("usage", "Feature usage",),
+            &["feature", "project", "resource_name", "tier"],
+        )
+        .unwrap();
+
         Metrics {
             users_created,
             users_dropped,
             reconcile_failures,
             metrics_failures,
             dcu,
+            usage,
         }
     }
 }
@@ -80,6 +88,7 @@ impl Metrics {
         registry.register(Box::new(self.users_created.clone()))?;
         registry.register(Box::new(self.users_dropped.clone()))?;
         registry.register(Box::new(self.dcu.clone()))?;
+        registry.register(Box::new(self.usage.clone()))?;
 
         Ok(self)
     }
@@ -110,8 +119,7 @@ impl Metrics {
             .inc();
     }
 
-    pub fn count_dcu_consumed(&self, namespace: &str, network: &str, dcu: f64) {
-        let project = get_project_id(namespace);
+    pub fn count_dcu_consumed(&self, project: &str, network: &str, dcu: f64) {
         let service = format!("{}-{}", MumakPort::kind(&()), network);
         let service_type = format!("{}.{}", MumakPort::plural(&()), MumakPort::group(&()));
         let tenancy = "proxy";
@@ -119,8 +127,17 @@ impl Metrics {
         let dcu: u64 = dcu.ceil() as u64;
 
         self.dcu
-            .with_label_values(&[&project, &service, &service_type, tenancy])
+            .with_label_values(&[project, &service, &service_type, tenancy])
             .inc_by(dcu);
+    }
+
+    pub fn count_usage(&self, project: &str, resource_name: &str, tier: &str, value: f64) {
+        let feature = &MumakPort::kind(&());
+        let value: u64 = value.ceil() as u64;
+
+        self.usage
+            .with_label_values(&[feature, project, resource_name, tier])
+            .inc_by(value);
     }
 }
 
@@ -201,9 +218,20 @@ pub fn run_metrics_collector(state: Arc<State>) {
                 let total_exec_time = result.value * (interval as f64);
 
                 let dcu = total_exec_time * dcu_per_second;
+                let project = get_project_id(&crd.namespace().unwrap());
+
                 state
                     .metrics
-                    .count_dcu_consumed(&crd.namespace().unwrap(), &crd.spec.network, dcu);
+                    .count_dcu_consumed(&project, &crd.spec.network, dcu);
+                state.metrics.count_usage(
+                    &project,
+                    &crd.name_any(),
+                    &crd.spec()
+                        .throughput_tier
+                        .clone()
+                        .unwrap_or("0".to_string()),
+                    total_exec_time,
+                );
             }
         }
     });
