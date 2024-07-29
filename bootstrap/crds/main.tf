@@ -1,7 +1,7 @@
 resource "kubernetes_manifest" "customresourcedefinition_mumakports_demeter_run" {
   manifest = {
     "apiVersion" = "apiextensions.k8s.io/v1"
-    "kind"       = "CustomResourceDefinition"
+    "kind" = "CustomResourceDefinition"
     "metadata" = {
       "name" = "mumakports.demeter.run"
     }
@@ -11,7 +11,7 @@ resource "kubernetes_manifest" "customresourcedefinition_mumakports_demeter_run"
         "categories" = [
           "demeter-port",
         ]
-        "kind"   = "MumakPort"
+        "kind" = "MumakPort"
         "plural" = "mumakports"
         "shortNames" = [
           "mumak",
@@ -24,23 +24,23 @@ resource "kubernetes_manifest" "customresourcedefinition_mumakports_demeter_run"
           "additionalPrinterColumns" = [
             {
               "jsonPath" = ".spec.network"
-              "name"     = "Network"
-              "type"     = "string"
+              "name" = "Network"
+              "type" = "string"
             },
             {
               "jsonPath" = ".spec.throughputTier"
-              "name"     = "Throughput Tier"
-              "type"     = "string"
+              "name" = "Throughput Tier"
+              "type" = "string"
             },
             {
               "jsonPath" = ".status.username"
-              "name"     = "Username"
-              "type"     = "string"
+              "name" = "Username"
+              "type" = "string"
             },
             {
               "jsonPath" = ".status.password"
-              "name"     = "Password"
-              "type"     = "string"
+              "name" = "Password"
+              "type" = "string"
             },
           ]
           "name" = "v1alpha1"
@@ -53,9 +53,17 @@ resource "kubernetes_manifest" "customresourcedefinition_mumakports_demeter_run"
                     "network" = {
                       "type" = "string"
                     }
+                    "password" = {
+                      "nullable" = true
+                      "type" = "string"
+                    }
                     "throughputTier" = {
                       "nullable" = true
-                      "type"     = "string"
+                      "type" = "string"
+                    }
+                    "username" = {
+                      "nullable" = true
+                      "type" = "string"
                     }
                   }
                   "required" = [
@@ -84,10 +92,10 @@ resource "kubernetes_manifest" "customresourcedefinition_mumakports_demeter_run"
                 "spec",
               ]
               "title" = "MumakPort"
-              "type"  = "object"
+              "type" = "object"
             }
           }
-          "served"  = true
+          "served" = true
           "storage" = true
           "subresources" = {
             "status" = {}
