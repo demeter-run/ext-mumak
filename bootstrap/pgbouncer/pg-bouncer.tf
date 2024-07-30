@@ -247,5 +247,7 @@ resource "kubernetes_config_map" "mumak_pgbouncer_ini_config" {
 
   data = {
     "pgbouncer.ini" = "${templatefile("${path.module}/pgbouncer.ini.tftpl", { db_host = "${var.postgres_instance_name}", users = var.user_settings })}"
+    # Empty file to bypass bitnami userlist bootstrapping, which we do ourselves.
+    "userlist.txt" = ""
   }
 }
