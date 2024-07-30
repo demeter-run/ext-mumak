@@ -7,8 +7,6 @@ pub struct Config {
     pub tiers_poll_interval: Duration,
     pub postgres_password: String,
     pub pgbouncer_password: String,
-    pub configmap_name: String,
-    pub configmap_namespace: String,
     pub users_ini_filepath: PathBuf,
     pub userlist_filepath: PathBuf,
     pub connection_options: String,
@@ -30,9 +28,6 @@ impl Config {
                 .unwrap_or(Duration::from_secs(2)),
             postgres_password: env::var("POSTGRES_PASSWORD").expect("POSTGRES_PASSWORD missing"),
             pgbouncer_password: env::var("PGBOUNCER_PASSWORD").expect("PGBOUNCER_PASSWORD missing"),
-            configmap_name: env::var("CONFIGMAP_NAME").expect("CONFIGMAP_NAME missing"),
-            configmap_namespace: env::var("CONFIGMAP_NAMESPACE")
-                .expect("CONFIGMAP_NAMESPACE missing"),
             users_ini_filepath: env::var("USERS_INI_FILEPATH")
                 .map(|v| v.into())
                 .expect("USERS_INI_FILEPATH must be set"),
