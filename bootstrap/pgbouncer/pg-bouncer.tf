@@ -1,3 +1,8 @@
+locals {
+  users_volume         = "/etc/pgbouncer"
+  tiers_configmap_name = "mumak_tiers"
+}
+
 resource "kubernetes_deployment_v1" "pgbouncer" {
   wait_for_rollout = false
   metadata {
@@ -85,14 +90,9 @@ resource "kubernetes_deployment_v1" "pgbouncer" {
             value = "5432"
           }
 
-          env {
-            name  = "PGBOUNCER_USERLIST_FILE"
-            value = "/etc/pgbouncer/users.txt"
-          }
-
           volume_mount {
             name       = "pgbouncer-users"
-            mount_path = "/etc/pgbouncer"
+            mount_path = local.users_volume
           }
 
           volume_mount {
@@ -121,11 +121,64 @@ resource "kubernetes_deployment_v1" "pgbouncer" {
 
         }
 
+        container {
+          name  = "pgbouncer-tier-updater"
+          image = "ghcr.io/demeter-run/ext-mumak-pgbouncer-tier-updater:${var.pgbouncer_tier_updater_image_tag}"
+
+          resources {
+            limits = {
+              memory = "250Mi"
+            }
+            requests = {
+              cpu    = "100m"
+              memory = "250Mi"
+            }
+          }
+
+          env {
+            name  = "TIERS_PATH"
+            value = "/etc/tiers/tiers.toml"
+          }
+
+          env {
+            name = "POSTGRES_PASSWORD"
+            value_from {
+              secret_key_ref {
+                name = var.postgres_secret_name
+                key  = "password"
+              }
+            }
+          }
+
+          env {
+            name  = "PGBOUNCER_PASSWORD"
+            value = var.auth_user_password
+          }
+
+          env {
+            name  = "USERS_INI_FILEPATH"
+            value = "${local.users_volume}/users.ini"
+          }
+
+          env {
+            name  = "USERLIST_FILEPATH"
+            value = "${local.users_volume}/userlist.txt"
+          }
+
+          volume_mount {
+            name       = "pgbouncer-users"
+            mount_path = local.users_volume
+          }
+
+          volume_mount {
+            name       = "tiers"
+            mount_path = "/etc/tiers"
+          }
+        }
+
         volume {
           name = "pgbouncer-users"
-          config_map {
-            name = "${var.instance_name}-pgbouncer-users"
-          }
+          empty_dir {}
         }
 
         volume {
@@ -139,6 +192,13 @@ resource "kubernetes_deployment_v1" "pgbouncer" {
           name = "pgbouncer-certs"
           config_map {
             name = var.certs_configmap_name
+          }
+        }
+
+        volume {
+          name = "tiers"
+          config_map {
+            name = local.tiers_configmap_name
           }
         }
 
@@ -167,14 +227,14 @@ resource "kubernetes_deployment_v1" "pgbouncer" {
 }
 
 
-resource "kubernetes_config_map" "mumak_pgbouncer_users" {
+resource "kubernetes_config_map" "mumak_pgbouncer_tiers" {
   metadata {
     namespace = var.namespace
-    name      = "${var.instance_name}-pgbouncer-users"
+    name      = local.tiers_configmap_name
   }
 
   data = {
-    "users.txt" = "${templatefile("${path.module}/users.txt.tftpl", { auth_user_password = "${var.auth_user_password}", users = var.user_settings })}"
+    "tiers.toml" = file("${path.module}/tiers.toml")
   }
 }
 

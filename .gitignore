@@ -1,3 +1,6 @@
 target
 .env
 env-crd.yaml
+pgbouncer-tier-updater/tiers.toml
+pgbouncer-tier-updater/userlist.txt
+pgbouncer-tier-updater/users.ini
