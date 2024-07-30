@@ -11,6 +11,10 @@ variable "image_tag" {
   default = "1.21.0"
 }
 
+variable "pgbouncer_tier_updater_image_tag" {
+  type = string
+}
+
 variable "replicas" {
   default = 1
 }
