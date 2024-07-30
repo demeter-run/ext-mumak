@@ -1,6 +1,6 @@
 locals {
   users_volume         = "/etc/pgbouncer"
-  tiers_configmap_name = "mumak_tiers"
+  tiers_configmap_name = "mumak-tiers"
 }
 
 resource "kubernetes_deployment_v1" "pgbouncer" {
@@ -246,7 +246,11 @@ resource "kubernetes_config_map" "mumak_pgbouncer_ini_config" {
   }
 
   data = {
-    "pgbouncer.ini" = "${templatefile("${path.module}/pgbouncer.ini.tftpl", { db_host = "${var.postgres_instance_name}", users = var.user_settings })}"
+    "pgbouncer.ini" = "${templatefile("${path.module}/pgbouncer.ini.tftpl", {
+      db_host      = "${var.postgres_instance_name}",
+      users        = var.user_settings,
+      users_volume = local.users_volume
+    })}"
     # Empty file to bypass bitnami userlist bootstrapping, which we do ourselves.
     "userlist.txt" = ""
   }
