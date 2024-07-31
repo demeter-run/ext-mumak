@@ -112,7 +112,7 @@ pub async fn update_configs(state: Arc<State>, config: Arc<Config>, client: Opti
             info!("Succesfully wrote userlist file.");
 
             // Send RELOAD to PgBouncer
-            reload(config);
+            reload(state).await;
         }
         Err(err) => {
             error!(
@@ -173,11 +173,8 @@ pub async fn create_userlist(config: Arc<Config>, crds: &Vec<MumakPort>) -> Stri
     accummulator.join("\n")
 }
 
-pub fn reload(config: Arc<Config>) {
-    let mut client = postgres::Client::connect(&config.connection_options, postgres::NoTls)
-        .expect("Unable to connect to PgBouncer instance, panicking");
-
-    match client.simple_query("RELOAD") {
+pub async fn reload(state: Arc<State>) {
+    match state.client.simple_query("RELOAD").await {
         Ok(_) => info!("Succesfully executed RELOAD on PgBouncer"),
         Err(err) => {
             panic!("Failed to execute RELOAD on PgBouncer: {}", err)
