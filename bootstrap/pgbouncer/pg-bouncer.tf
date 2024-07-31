@@ -151,6 +151,11 @@ resource "kubernetes_deployment_v1" "pgbouncer" {
           }
 
           env {
+            name  = "CONNECTION_OPTIONS"
+            value = "host=localhost user=pgbouncer password=${var.auth_user_password} dbname=pgbouncer port=6432"
+          }
+
+          env {
             name  = "PGBOUNCER_PASSWORD"
             value = var.auth_user_password
           }
