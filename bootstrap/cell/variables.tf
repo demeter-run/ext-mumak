@@ -58,6 +58,10 @@ variable "postgres_secret_name" {
 }
 
 // PGBouncer
+variable "pgbouncer_tier_updater_image_tag" {
+  type = string
+}
+
 variable "pgbouncer_image_tag" {
   default = "1.21.0"
 }
