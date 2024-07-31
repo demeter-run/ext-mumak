@@ -181,6 +181,20 @@ resource "kubernetes_deployment_v1" "pgbouncer" {
           }
         }
 
+        init_container {
+          name  = "init-user-files"
+          image = "busybox:1.28"
+          command = [
+            "sh", "-c",
+            "touch ${local.users_volume}/users.ini ${local.users_volume}/userlist.txt; echo '\"pgbouncer\" \"${var.auth_user_password}\"' > ${local.users_volume}/userlist.txt"
+          ]
+
+          volume_mount {
+            name       = "pgbouncer-users"
+            mount_path = local.users_volume
+          }
+        }
+
         volume {
           name = "pgbouncer-users"
           empty_dir {}
