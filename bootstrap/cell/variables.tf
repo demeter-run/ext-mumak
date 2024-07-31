@@ -58,7 +58,7 @@ variable "postgres_secret_name" {
 }
 
 // PGBouncer
-variable "pgbouncer_tier_updater_image_tag" {
+variable "pgbouncer_reloader_image_tag" {
   type = string
 }
 

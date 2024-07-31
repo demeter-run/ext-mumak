@@ -122,8 +122,8 @@ resource "kubernetes_deployment_v1" "pgbouncer" {
         }
 
         container {
-          name  = "pgbouncer-tier-updater"
-          image = "ghcr.io/demeter-run/ext-mumak-pgbouncer-tier-updater:${var.pgbouncer_tier_updater_image_tag}"
+          name  = "pgbouncer-reloader"
+          image = "ghcr.io/demeter-run/pgbouncer-reloader:${var.pgbouncer_reloader_image_tag}"
 
           resources {
             limits = {
@@ -138,6 +138,31 @@ resource "kubernetes_deployment_v1" "pgbouncer" {
           env {
             name  = "TIERS_PATH"
             value = "/etc/tiers/tiers.toml"
+          }
+
+          env {
+            name  = "API_RESOURCE_GROUP"
+            value = "demeter.run"
+          }
+
+          env {
+            name  = "API_RESOURCE_VERSION"
+            value = "v1alpha1"
+          }
+
+          env {
+            name  = "API_RESOURCE_API_VERSION"
+            value = "demeter.run/v1alpha1"
+          }
+
+          env {
+            name  = "API_RESOURCE_KIND"
+            value = "MumakPort"
+          }
+
+          env {
+            name  = "API_RESOURCE_PLURAL"
+            value = "mumakports"
           }
 
           env {

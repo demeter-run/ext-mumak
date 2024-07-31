@@ -87,7 +87,7 @@ variable "pgbouncer_image_tag" {
   default = "1.21.0"
 }
 
-variable "pgbouncer_tier_updater_image_tag" {
+variable "pgbouncer_reloader_image_tag" {
   type = string
 }
 
