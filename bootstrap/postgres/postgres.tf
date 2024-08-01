@@ -163,8 +163,7 @@ resource "kubernetes_stateful_set_v1" "postgres" {
         toleration {
           effect   = "NoSchedule"
           key      = "demeter.run/compute-arch"
-          operator = "Equal"
-          value    = "arm64"
+          operator = "Exists"
         }
 
         toleration {
