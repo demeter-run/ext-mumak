@@ -49,6 +49,8 @@ impl Context {
 pub struct MumakPortSpec {
     pub network: String,
     pub throughput_tier: Option<String>,
+    pub username: Option<String>,
+    pub password: Option<String>,
 }
 impl MumakPort {
     async fn reconcile(
@@ -62,8 +64,14 @@ impl MumakPort {
         let mumak_port = MumakPort::api_resource();
 
         let status = MumakPortStatus {
-            username: build_username(self)?,
-            password: build_password(self)?,
+            username: match &self.spec.username {
+                Some(username) => username.clone(),
+                None => build_username(self)?,
+            },
+            password: match &self.spec.password {
+                Some(password) => password.clone(),
+                None => build_password(self)?,
+            },
         };
 
         if self.status.is_none() {
