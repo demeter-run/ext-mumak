@@ -10,9 +10,9 @@ type = "${network}"
 
 [sink]
 type = "SqlDb"
-apply = "INSERT INTO blocks (slot, cbor) VALUES ('{{point.slot}}', decode('{{record.hex}}', 'hex'));"
-undo = "DELETE FROM blocks WHERE slot = {{point.slot}}"
-reset = "DELETE FROM blocks WHERE slot > {{#if point.slot}}{{point.slot}}{{else}}-1{{/if}};"
+apply_template = "INSERT INTO blocks (slot, cbor) VALUES ('{{point.slot}}', decode('{{record.hex}}', 'hex'));"
+undo_template = "DELETE FROM blocks WHERE slot = {{point.slot}}"
+reset_template = "DELETE FROM blocks WHERE slot > {{#if point.slot}}{{point.slot}}{{else}}-1{{/if}};"
 
 [cursor]
 type = "File"
