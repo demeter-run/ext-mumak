@@ -1,0 +1,30 @@
+[source]
+type = "N2C"
+socket_path = "/ipc/node.socket"
+
+[intersect]
+type = "Origin"
+
+[chain]
+type = "${network}"
+
+[[filters]]
+type = "SplitCbor"
+
+[sink]
+type = "SqlDb"
+apply = "INSERT INTO txs (slot, cbor) VALUES ('{{point.slot}}', decode('{{record.hex}}', 'hex'));"
+undo = "DELETE FROM txs WHERE slot = {{point.slot}}"
+reset = "DELETE FROM txs WHERE slot > {{#if point.slot}}{{point.slot}}{{else}}-1{{/if}};"
+
+[cursor]
+type = "File"
+path = "/data/cursor"
+
+[policy]
+missing_data = "Skip"
+cbor_errors = "Warn"
+
+[metrics]
+address = "0.0.0.0:9186"
+endpoint = "/metrics"
