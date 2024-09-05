@@ -1,12 +1,12 @@
-resource "kubernetes_stateful_set_v1" "indexer" {
+resource "kubernetes_stateful_set_v1" "tx_indexer" {
   wait_for_rollout = false
 
   metadata {
-    name      = var.instance_name
+    name      = local.tx_instance_name
     namespace = var.namespace
     labels = {
-      "role"                        = "indexer"
-      "demeter.run/kind"            = "MumakIndexer"
+      "role"                        = "TxIndexer"
+      "demeter.run/kind"            = "MumakTxIndexer"
       "cardano.demeter.run/network" = var.network
     }
   }
@@ -14,12 +14,12 @@ resource "kubernetes_stateful_set_v1" "indexer" {
 
   spec {
     replicas     = 1
-    service_name = "mumak-indexer"
+    service_name = "mumak-tx-indexer"
 
     selector {
       match_labels = {
-        "role"                        = "indexer"
-        "demeter.run/instance"        = var.instance_name
+        "role"                        = "TxIndexer"
+        "demeter.run/instance"        = local.tx_instance_name
         "cardano.demeter.run/network" = var.network
       }
     }
@@ -29,7 +29,7 @@ resource "kubernetes_stateful_set_v1" "indexer" {
         name      = "data"
         namespace = var.namespace
         labels = {
-          "demeter.run/instance" = var.instance_name
+          "demeter.run/instance" = local.tx_instance_name
         }
       }
       spec {
@@ -47,10 +47,10 @@ resource "kubernetes_stateful_set_v1" "indexer" {
     template {
 
       metadata {
-        name = var.instance_name
+        name = local.tx_instance_name
         labels = {
-          "role"                        = "indexer"
-          "demeter.run/instance"        = var.instance_name
+          "role"                        = "TxIndexer"
+          "demeter.run/instance"        = local.tx_instance_name
           "cardano.demeter.run/network" = var.network
         }
       }
@@ -147,7 +147,7 @@ resource "kubernetes_stateful_set_v1" "indexer" {
         volume {
           name = "configs"
           config_map {
-            name = local.configmap_name
+            name = local.tx_configmap_name
           }
         }
 

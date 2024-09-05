@@ -1,10 +1,21 @@
-resource "kubernetes_config_map" "config" {
+resource "kubernetes_config_map" "block_config" {
   metadata {
     namespace = var.namespace
-    name      = local.configmap_name
+    name      = local.block_configmap_name
   }
 
   data = {
-    "daemon.toml" = "${templatefile("${path.module}/daemon.toml.tftpl", { network = var.network })}"
+    "daemon.toml" = "${templatefile("${path.module}/block.daemon.toml.tftpl", { network = var.network })}"
+  }
+}
+
+resource "kubernetes_config_map" "tx_config" {
+  metadata {
+    namespace = var.namespace
+    name      = local.tx_configmap_name
+  }
+
+  data = {
+    "daemon.toml" = "${templatefile("${path.module}/tx.daemon.toml.tftpl", { network = var.network })}"
   }
 }
