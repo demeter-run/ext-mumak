@@ -1,0 +1,89 @@
+# Job to create indexes on Mumak instance.
+#
+# This is difficult to automatize because it has to be ran after the postgres is created 
+# and dbsync has ran, but before anyone uses it. Here you have to replace the salt, the 
+# network and the network magic for it to work.
+---
+apiVersion: v1
+data:
+  indexes.sql: |
+    CREATE INDEX block_number_idx ON blocks ((block_number(cbor)));
+    CREATE INDEX block_pool_id_idx ON blocks ((block_pool_id(cbor)));
+    CREATE INDEX block_epoch_idx ON blocks ((block_epoch(cbor, {network_magic})));
+    CREATE INDEX block_slot_as_time_idx ON blocks ((block_slot_as_time(cbor, {network_magic})));
+    CREATE INDEX block_slot_idx ON blocks (block_slot(cbor));
+
+    CREATE INDEX idx_tx_hash ON txs (tx_hash(cbor));
+    CREATE INDEX idx_gin_tx_inputs ON txs USING GIN (tx_inputs(cbor));
+    CREATE INDEX idx_gin_tx_addresses ON txs USING GIN (tx_addresses(cbor));
+    CREATE INDEX idx_gin_tx_outputs_json ON txs USING GIN (tx_outputs_json(cbor));
+    CREATE INDEX idx_gin_tx_plutus_data ON txs USING GIN (tx_plutus_data(cbor));
+    CREATE INDEX idx_gin_tx_mint ON txs USING GIN (tx_mint(cbor));
+immutable: false
+kind: ConfigMap
+metadata:
+  name: create-indexes-config-postgres-mumak-m0-{salt}-{network}
+  namespace: ext-mumak-m0
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generation: 1
+  name: create-indexes-job-postgres-mumak-m0-{salt}-{network}
+  namespace: ext-mumak-m0
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - command:
+        - psql
+        - -U
+        - postgres
+        - -h
+        - postgres-{salt}
+        - -d
+        - cardano-{network}
+        - -f
+        - /etc/sql/indexes.sql
+        - -e
+        - -v
+        - VERBOSITY=verbose
+        env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: postgres-secret
+              optional: false
+        image: postgres:14.10-bullseye
+        name: main
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+          requests:
+            cpu: 200m
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /etc/sql/
+          name: query
+      tolerations:
+      - effect: NoSchedule
+        key: demeter.run/compute-profile
+        operator: Equal
+        value: general-purpose
+      - effect: NoSchedule
+        key: demeter.run/compute-arch
+        operator: Equal
+        value: x86
+      - effect: NoSchedule
+        key: demeter.run/availability-sla
+        operator: Equal
+        value: best-effort
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: create-indexes-config-postgres-mumak-m0-{salt}-{network}
+          optional: false
+        name: query
