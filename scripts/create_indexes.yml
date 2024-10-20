@@ -7,6 +7,81 @@
 apiVersion: v1
 data:
   indexes.sql: |
+    DROP EXTENSION mumak CASCADE;
+    CREATE EXTENSION mumak;
+
+    // Temporary. Bulk insert into UTxOs.
+    INSERT INTO utxos (slot, era, id, cbor)
+    SELECT
+      txs_with_era.slot,
+      txs_with_era.era,
+      CONCAT(tx_hash(txs_with_era.cbor), '#', utxos.output_index) AS id,
+      utxos.cbor
+    FROM (  
+      SELECT slot, block_era(blocks.cbor) AS era, txs.cbor
+      FROM blocks, LATERAL (SELECT * FROM unnest(block_txs_cbor(blocks.cbor))) AS txs(cbor)
+    ) AS txs_with_era, LATERAL tx_outputs(txs_with_era.cbor) AS utxos;
+    
+    UPDATE utxos
+    SET spent_slot = spent.slot 
+    FROM (
+      SELECT utxos.id, blocks.slot
+      FROM 
+        blocks,
+        LATERAL (SELECT * FROM unnest(block_txs_cbor(blocks.cbor))) AS txs(cbor),
+        LATERAL (SELECT * FROM unnest(tx_inputs(txs.cbor))) AS utxos(id)
+    ) AS spent
+    WHERE utxos.id = spent.id;
+
+    // Oura functions:
+    CREATE OR REPLACE FUNCTION apply_block_on_utxo_table(apply_slot bigint, block_hex text)
+    RETURNS void AS $$
+    BEGIN
+      -- Insert tx outputs,
+      INSERT INTO utxos (slot, era, id, cbor)
+      SELECT
+        txs_with_era.slot,
+        txs_with_era.era,
+        CONCAT(tx_hash(txs_with_era.cbor), '#', utxos.output_index) AS id,
+        utxos.cbor
+      FROM (  
+        SELECT apply_slot AS slot, block_era(decode(block_hex, 'hex')) AS era, txs.cbor
+        FROM LATERAL (SELECT * FROM unnest(block_txs_cbor(decode(block_hex, 'hex')))) AS txs(cbor)
+      ) AS txs_with_era, LATERAL tx_outputs(txs_with_era.cbor) AS utxos
+      ;
+      -- "Spend" tx inputs
+      UPDATE utxos
+      SET spent_slot = apply_slot 
+      WHERE id IN (
+        SELECT utxos.id
+        FROM 
+          LATERAL (SELECT * FROM unnest(block_txs_cbor(decode(block_hex, 'hex')))) AS txs(cbor),
+          LATERAL (SELECT * FROM unnest(tx_inputs(cbor))) AS utxos(id)
+      );
+    END;
+    $$ LANGUAGE plpgsql;
+    
+    CREATE OR REPLACE FUNCTION undo_block_on_utxo_table(undo_slot bigint)
+    RETURNS void AS $$
+    BEGIN
+      -- Remove UTXOs added by block.
+      DELETE FROM utxos WHERE slot = undo_slot;
+      -- "Unspend" UTXOs spent on block
+      UPDATE utxos SET spent_slot = NULL WHERE spent_slot = undo_slot;
+    END;
+    $$ LANGUAGE plpgsql;
+    
+    CREATE OR REPLACE FUNCTION reset_block_on_utxo_table(reset_slot bigint)
+    RETURNS void AS $$
+    BEGIN
+      -- Remove UTXOs added by blocks that are after reset.
+      DELETE FROM utxos WHERE slot > reset_slot;
+      -- "Unspend" UTXOs spent on blocks after reset.
+      UPDATE utxos SET spent_slot = NULL WHERE spent_slot > reset_slot;
+    END;
+    $$ LANGUAGE plpgsql;
+
+    // Indexes
     CREATE INDEX block_number_idx ON blocks ((block_number(cbor)));
     CREATE INDEX block_pool_id_idx ON blocks ((block_pool_id(cbor)));
     CREATE INDEX block_epoch_idx ON blocks ((block_epoch(cbor, {network_magic})));
