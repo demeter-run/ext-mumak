@@ -27,5 +27,14 @@ for db in "${databases[@]}"; do
 
     psql -d "$db" -c "CREATE INDEX IF NOT EXISTS idx_txs_slot ON txs(slot);"
 
+    psql -d "$db" -c "
+    CREATE TABLE utxos (
+        slot INTEGER NOT NULL,
+        era INTEGER NOT NULL,
+        id VARCHAR PRIMARY KEY,
+        spent_slot INTEGER,
+        cbor BYTEA NOT NULL
+    );"
+
     echo "Initialization completed for database: $db"
 done
