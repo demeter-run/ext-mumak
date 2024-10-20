@@ -1,9 +1,11 @@
 locals {
   block_configmap_name = "oura-config-${var.instance_name}-blocks"
   tx_configmap_name    = "oura-config-${var.instance_name}-txs"
+  utx0_configmap_name  = "oura-config-${var.instance_name}-utxos"
 
   block_instance_name = "${var.instance_name}-block"
   tx_instance_name    = "${var.instance_name}-tx"
+  utxo_instance_name  = "${var.instance_name}-utxo"
 }
 
 variable "namespace" {

@@ -1,0 +1,27 @@
+[source]
+type = "N2C"
+socket_path = "/ipc/node.socket"
+
+[intersect]
+type = "Origin"
+
+[chain]
+type = "${network}"
+
+[sink]
+type = "SqlDb"
+apply_template = "SELECT apply_block_on_utxo_table({{point.slot}}, '{{record.hex}}');"
+undo_template = "SELECT undo_block_on_utxo_table({{point.slot}});"
+reset_template = "SELECT reset_block_on_utxo_table({{#if point.slot}}{{point.slot}}{{else}}-1{{/if}});"
+
+[cursor]
+type = "File"
+path = "/data/cursor"
+
+[policy]
+missing_data = "Skip"
+cbor_errors = "Warn"
+
+[metrics]
+address = "0.0.0.0:9186"
+endpoint = "/metrics"
