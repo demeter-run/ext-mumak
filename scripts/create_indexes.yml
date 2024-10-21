@@ -10,30 +10,7 @@ data:
     DROP EXTENSION mumak CASCADE;
     CREATE EXTENSION mumak;
 
-    // Temporary. Bulk insert into UTxOs.
-    INSERT INTO utxos (slot, era, id, cbor)
-    SELECT
-      txs_with_era.slot,
-      txs_with_era.era,
-      CONCAT(tx_hash(txs_with_era.cbor), '#', utxos.output_index) AS id,
-      utxos.cbor
-    FROM (  
-      SELECT slot, block_era(blocks.cbor) AS era, txs.cbor
-      FROM blocks, LATERAL (SELECT * FROM unnest(block_txs_cbor(blocks.cbor))) AS txs(cbor)
-    ) AS txs_with_era, LATERAL tx_outputs(txs_with_era.cbor) AS utxos;
-    
-    UPDATE utxos
-    SET spent_slot = spent.slot 
-    FROM (
-      SELECT utxos.id, blocks.slot
-      FROM 
-        blocks,
-        LATERAL (SELECT * FROM unnest(block_txs_cbor(blocks.cbor))) AS txs(cbor),
-        LATERAL (SELECT * FROM unnest(tx_inputs(txs.cbor))) AS utxos(id)
-    ) AS spent
-    WHERE utxos.id = spent.id;
-
-    // Oura functions:
+    -- Oura functions:
     CREATE OR REPLACE FUNCTION apply_block_on_utxo_table(apply_slot bigint, block_hex text)
     RETURNS void AS $$
     BEGIN
@@ -81,7 +58,7 @@ data:
     END;
     $$ LANGUAGE plpgsql;
 
-    // Indexes
+    -- Indexes
     CREATE INDEX block_number_idx ON blocks ((block_number(cbor)));
     CREATE INDEX block_pool_id_idx ON blocks ((block_pool_id(cbor)));
     CREATE INDEX block_epoch_idx ON blocks ((block_epoch(cbor, {network_magic})));
@@ -105,7 +82,6 @@ metadata:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  generation: 1
   name: create-indexes-job-postgres-mumak-m0-{salt}-{network}
   namespace: ext-mumak-m0
 spec:
