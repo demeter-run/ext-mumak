@@ -25,7 +25,7 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 RUN cargo install --locked cargo-pgrx@0.11.3 && cargo pgrx init --pg16 /usr/lib/postgresql/16/bin/pg_config
 
 WORKDIR /source
-ARG MUMAK_COMMIT=0381af3cfe535a0bb21055a4868e3348e4e39cc3
+ARG MUMAK_COMMIT=4da43f3cb21d986280faf2ad373db954418dc888
 RUN git clone https://github.com/txpipe/mumak.git
 RUN cd mumak && git checkout $MUMAK_COMMIT
 
