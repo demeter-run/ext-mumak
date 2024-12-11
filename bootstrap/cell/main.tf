@@ -55,6 +55,25 @@ module "mumak_indexers" {
   node_private_dns     = each.value.node_private_dns
   postgres_host        = local.postgres_host
   postgres_secret_name = var.postgres_secret_name
+  tolerations = coalesce(each.value.tolerations, [
+    {
+      effect   = "NoSchedule"
+      key      = "demeter.run/compute-profile"
+      operator = "Equal"
+      value    = "general-purpose"
+    },
+    {
+      effect   = "NoSchedule"
+      key      = "demeter.run/compute-arch"
+      operator = "Equal"
+      value    = "x86"
+    },
+    {
+      effect   = "NoSchedule"
+      key      = "demeter.run/availability-sla"
+      operator = "Exists"
+    }
+  ])
   resources = coalesce(each.value.resources, {
     limits : {
       cpu : "200m",
