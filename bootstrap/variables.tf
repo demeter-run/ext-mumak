@@ -136,6 +136,13 @@ variable "cells" {
       testnet_magic    = string
       node_private_dns = string
       db               = string
+      tolerations = optional(list(object({
+        effect   = string
+        key      = string
+        operator = string
+        value    = optional(string)
+        }))
+      )
       resources = optional(object({
         limits = object({
           cpu    = string
