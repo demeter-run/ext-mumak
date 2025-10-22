@@ -42,7 +42,7 @@ resource "kubernetes_deployment_v1" "pgbouncer" {
       spec {
         container {
           name  = "main"
-          image = "bitnami/pgbouncer:${var.image_tag}"
+          image = "bitnamilegacy/pgbouncer:${var.image_tag}"
 
           resources {
             limits = {
