@@ -18,16 +18,6 @@ variable "db_max_connections" {
   default = 2
 }
 
-variable "dcu_per_second" {
-  type = map(string)
-  default = {
-    "mainnet" = "10"
-    "preprod" = "5"
-    "preview" = "5"
-  }
-}
-
-
 variable "postgres_hosts" {
   type = list(string)
 }
