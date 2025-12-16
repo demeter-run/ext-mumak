@@ -14,7 +14,6 @@ module "mumak_feature" {
   key_salt           = var.key_salt
   metrics_delay      = var.metrics_delay
   db_max_connections = var.db_max_connections
-  dcu_per_second     = var.dcu_per_second
   resources          = var.operator_resources
 
   postgres_password    = var.postgres_password

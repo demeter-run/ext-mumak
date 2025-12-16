@@ -61,11 +61,6 @@ resource "kubernetes_deployment_v1" "operator" {
           }
 
           env {
-            name  = "DCU_PER_SECOND"
-            value = "mainnet=${var.dcu_per_second["mainnet"]},preprod=${var.dcu_per_second["preprod"]},preview=${var.dcu_per_second["preview"]}"
-          }
-
-          env {
             name  = "DB_URLS"
             value = local.combined_postgres_urls
           }

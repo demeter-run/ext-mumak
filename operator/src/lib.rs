@@ -1,6 +1,6 @@
 use std::{
     collections::HashMap,
-    io::{self, ErrorKind},
+    io::{self},
 };
 
 use postgres::Postgres;
@@ -90,7 +90,7 @@ impl From<deadpool_postgres::PoolError> for Error {
 }
 impl From<Error> for io::Error {
     fn from(value: Error) -> Self {
-        Self::new(ErrorKind::Other, value)
+        Self::other(value)
     }
 }
 impl From<argon2::Error> for Error {
