@@ -4,6 +4,8 @@ variable "namespace" {
 
 variable "volume_name" {
   description = "the name of the volume"
+  type        = string
+  default     = null
 }
 
 variable "name" {
@@ -12,6 +14,10 @@ variable "name" {
 
 variable "storage_size" {
   description = "the size of the volume"
+}
+
+variable "storage_class_name" {
+  default = "nvme"
 }
 
 resource "kubernetes_persistent_volume_claim" "shared_disk" {
@@ -29,7 +35,7 @@ resource "kubernetes_persistent_volume_claim" "shared_disk" {
         storage = var.storage_size
       }
     }
-    storage_class_name = "nvme"
+    storage_class_name = var.storage_class_name
     volume_name        = var.volume_name
   }
 }

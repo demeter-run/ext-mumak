@@ -5,11 +5,12 @@ locals {
   postgres_host = "postgres-${var.salt}"
 }
 module "mumak_pvc" {
-  source       = "../pvc"
-  namespace    = var.namespace
-  volume_name  = var.volume_name
-  storage_size = var.storage_size
-  name         = "pvc-${var.salt}"
+  source             = "../pvc"
+  namespace          = var.namespace
+  volume_name        = var.volume_name
+  storage_size       = var.storage_size
+  storage_class_name = var.storage_class_name
+  name               = "pvc-${var.salt}"
 }
 
 module "mumak_postgres" {
@@ -24,6 +25,24 @@ module "mumak_postgres" {
   image_tag            = var.postgres_image_tag
   postgres_secret_name = var.postgres_secret_name
   postgres_resources   = var.postgres_resources
+  postgres_tolerations = coalesce(var.postgres_tolerations, [
+    {
+      effect   = "NoSchedule"
+      key      = "demeter.run/compute-profile"
+      operator = "Exists"
+    },
+    {
+      effect   = "NoSchedule"
+      key      = "demeter.run/compute-arch"
+      operator = "Exists"
+    },
+    {
+      effect   = "NoSchedule"
+      key      = "demeter.run/availability-sla"
+      operator = "Equal"
+      value    = "consistent"
+    }
+  ])
 }
 
 module "mumak_pgbouncer" {

@@ -153,24 +153,15 @@ resource "kubernetes_stateful_set_v1" "postgres" {
           }
         }
 
-        toleration {
-          effect   = "NoSchedule"
-          key      = "demeter.run/compute-profile"
-          operator = "Equal"
-          value    = "disk-intensive"
-        }
+        dynamic "toleration" {
+          for_each = var.postgres_tolerations
 
-        toleration {
-          effect   = "NoSchedule"
-          key      = "demeter.run/compute-arch"
-          operator = "Exists"
-        }
-
-        toleration {
-          effect   = "NoSchedule"
-          key      = "demeter.run/availability-sla"
-          operator = "Equal"
-          value    = "consistent"
+          content {
+            effect   = toleration.value.effect
+            key      = toleration.value.key
+            operator = toleration.value.operator
+            value    = toleration.value.value
+          }
         }
       }
     }

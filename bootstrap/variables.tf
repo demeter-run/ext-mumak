@@ -97,8 +97,9 @@ variable "pgbouncer_auth_user_password" {
 variable "cells" {
   type = map(object({
     pvc = object({
-      volume_name  = string
-      storage_size = string
+      volume_name        = optional(string)
+      storage_size       = string
+      storage_class_name = string
     })
     postgres = object({
       image_tag     = string
@@ -114,7 +115,13 @@ variable "cells" {
           memory = string
         })
       })
-
+      tolerations = optional(list(object({
+        effect   = string
+        key      = string
+        operator = string
+        value    = optional(string)
+        }))
+      )
     })
     pgbouncer = object({
       replicas = number

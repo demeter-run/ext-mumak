@@ -14,10 +14,15 @@ variable "certs_configmap_name" {
 
 // PVC
 variable "volume_name" {
-  type = string
+  type    = string
+  default = null
 }
 
 variable "storage_size" {
+  type = string
+}
+
+variable "storage_class_name" {
   type = string
 }
 
@@ -51,6 +56,34 @@ variable "postgres_resources" {
       cpu    = "100m"
     }
   }
+}
+
+variable "postgres_tolerations" {
+  type = list(object({
+    effect   = string
+    key      = string
+    operator = string
+    value    = optional(string)
+    })
+  )
+  default = [
+    {
+      effect   = "NoSchedule"
+      key      = "demeter.run/compute-profile"
+      operator = "Exists"
+    },
+    {
+      effect   = "NoSchedule"
+      key      = "demeter.run/compute-arch"
+      operator = "Exists"
+    },
+    {
+      effect   = "NoSchedule"
+      key      = "demeter.run/availability-sla"
+      operator = "Equal"
+      value    = "consistent"
+    }
+  ]
 }
 
 variable "postgres_secret_name" {

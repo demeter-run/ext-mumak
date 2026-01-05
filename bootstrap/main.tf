@@ -42,14 +42,16 @@ module "mumak_cells" {
   salt      = each.key
 
   // PVC
-  volume_name  = each.value.pvc.volume_name
-  storage_size = each.value.pvc.storage_size
+  volume_name        = each.value.pvc.volume_name
+  storage_size       = each.value.pvc.storage_size
+  storage_class_name = each.value.pvc.storage_class_name
 
   // PG
   topology_zone        = each.value.postgres.topology_zone
   postgres_image_tag   = each.value.postgres.image_tag
   postgres_secret_name = var.postgres_secret_name
   postgres_resources   = each.value.postgres.resources
+  postgres_tolerations = each.value.postgres.tolerations
   databases            = each.value.postgres.databases
 
   // PGBouncer
